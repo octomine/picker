@@ -1,4 +1,4 @@
-const V = 100
+import { BASE_DRAG, MIN_DIST, BASE_VELOCITY } from "./constants";
 
 export class MainScene extends Phaser.Scene {
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
@@ -20,7 +20,7 @@ export class MainScene extends Phaser.Scene {
 
     create() {
         this.actor = this.physics.add.sprite(100, 100, 'penta')
-        this.actor.setDrag(300)
+        this.actor.setDrag(BASE_DRAG)
 
         this.cursors = this.input.keyboard?.createCursorKeys()
 
@@ -40,15 +40,21 @@ export class MainScene extends Phaser.Scene {
 
         this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
             if (this.isDragging) {
-                this.debText.setText('MOVE')
-                const dx = pointer.x - this.pressedPoint.x
-                const dy = pointer.y - this.pressedPoint.y
-                const xx = Math.abs(dx)
-                const yy = Math.abs(dy)
-                if (yy > xx) {
-                    this.changeVelocity({ x: 0, y: Math.sign(dy) * V })
+                const { position, prevPosition, x, y } = pointer
+                const dist = position.distance(prevPosition)
+                if (dist > MIN_DIST) {
+                    this.debText.setText('MOVE')
+                    const dx = x - this.pressedPoint.x
+                    const dy = y - this.pressedPoint.y
+                    const xx = Math.abs(dx)
+                    const yy = Math.abs(dy)
+                    if (yy > xx) {
+                        this.changeVelocity({ x: 0, y: Math.sign(dy) * BASE_VELOCITY })
+                    } else {
+                        this.changeVelocity({ x: Math.sign(dx) * BASE_VELOCITY, y: 0 })
+                    }
                 } else {
-                    this.changeVelocity({ x: Math.sign(dx) * V, y: 0 })
+                    this.pressedPoint = { x, y }
                 }
             }
         }, this)
@@ -66,16 +72,16 @@ export class MainScene extends Phaser.Scene {
         }
 
         if (this.cursors?.down.isDown) {
-            this.changeVelocity({ x: 0, y: V })
+            this.changeVelocity({ x: 0, y: BASE_VELOCITY })
         }
         if (this.cursors?.up.isDown) {
-            this.changeVelocity({ x: 0, y: -V })
+            this.changeVelocity({ x: 0, y: -BASE_VELOCITY })
         }
         if (this.cursors?.right.isDown) {
-            this.changeVelocity({ x: V, y: 0 })
+            this.changeVelocity({ x: BASE_VELOCITY, y: 0 })
         }
         if (this.cursors?.left.isDown) {
-            this.changeVelocity({ x: -V, y: 0 })
+            this.changeVelocity({ x: -BASE_VELOCITY, y: 0 })
         }
     }
 
