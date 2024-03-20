@@ -4,6 +4,10 @@ import { MainScene } from './scenes'
 const config = {
     type: Phaser.AUTO,
     title: 'game',
+    scale: {
+        width: 800,
+        height: 600,
+    },
     scene: [MainScene],
     physics: {
         default: 'arcade'
