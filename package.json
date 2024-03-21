@@ -28,5 +28,6 @@
     "phaser": "^3.80.1",
     "typescript": "^5.2.2",
     "vite": "^5.1.6"
-  }
+  },
+  "homepage": "https://octomine.github.io/picker/"
 }
