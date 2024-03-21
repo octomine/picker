@@ -8,6 +8,7 @@ export default defineConfig({
   },
   plugins: [react()],
   root: '.',
+  base: '/picker/',
   build: {
     outDir: 'build'
   }
