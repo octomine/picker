@@ -1,5 +1,8 @@
+import 'phaser'
 import './App.css'
-import { Game } from './components/game'
+import { initGame, Game } from './components/game'
+
+window.addEventListener('load', initGame)
 
 function App() {
   return (
