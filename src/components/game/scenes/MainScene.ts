@@ -1,4 +1,4 @@
-import { BASE_DRAG, MIN_DIST, BASE_VELOCITY } from "./constants";
+import { BASE_DRAG, MIN_DIST, BASE_VELOCITY } from "../constants";
 
 export class MainScene extends Phaser.Scene {
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
