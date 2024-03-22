@@ -63,6 +63,14 @@ export class MainScene extends Phaser.Scene {
             this.changeVelocity({ x: 0, y: 0 })
         }, this)
 
+        this.scale.addListener('resize', ({ width, height }: { width: number, height: number }) => {
+            console.log('RESIZE!!1');
+            this.debText.setText([
+                `width: ${width}`,
+                `height: ${height}`
+            ])
+        }, this)
+
         this.debText = this.add.text(0, 0, 'deb', { fontSize: '20px', color: '#ffffff' })
     }
 

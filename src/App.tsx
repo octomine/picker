@@ -6,7 +6,7 @@ window.addEventListener('load', initGame)
 
 function App() {
   return (
-    <div><Game></Game></div>
+    <Game></Game>
   )
 }
 
