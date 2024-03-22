@@ -14,10 +14,16 @@ export const initGame = () => {
         canvas: document.getElementById('game-canvas') as HTMLCanvasElement,
         width: window.innerWidth,
         height: window.innerHeight,
+        scale: {
+            mode: Phaser.Scale.RESIZE,
+            parent: 'game',
+            width: '100%',
+            height: '100%',
+        },
         scene: [MainScene],
         physics: {
-            default: 'arcade'
-        }
+            default: 'arcade',
+        },
     }
     window.game = new Phaser.Game(config)
 }
