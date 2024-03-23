@@ -25,20 +25,20 @@ export class MainScene extends Phaser.Scene {
         this.cursors = this.input.keyboard?.createCursorKeys()
 
         this.input.addPointer(9)
-        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
             this.debText.setText('DOWN')
             this.isDragging = true
             const { x, y } = pointer
             this.pressedPoint = { x, y }
         }, this)
 
-        this.input.on('pointerup', () => {
+        this.input.on(Phaser.Input.Events.POINTER_UP, () => {
             this.debText.setText('UP')
             this.isDragging = false
             this.changeVelocity({ x: 0, y: 0 })
         }, this)
 
-        this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+        this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
             if (this.isDragging) {
                 const { position, prevPosition, x, y } = pointer
                 const dist = position.distance(prevPosition)
@@ -59,11 +59,11 @@ export class MainScene extends Phaser.Scene {
             }
         }, this)
 
-        this.input.keyboard?.on('keyup', () => {
+        this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_UP, () => {
             this.changeVelocity({ x: 0, y: 0 })
         }, this)
 
-        this.scale.addListener('resize', ({ width, height }: { width: number, height: number }) => {
+        this.scale.addListener(Phaser.Scale.Events.RESIZE, ({ width, height }: { width: number, height: number }) => {
             console.log('RESIZE!!1');
             this.debText.setText([
                 `width: ${width}`,
