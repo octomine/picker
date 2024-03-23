@@ -9,7 +9,8 @@ export class MainScene extends Phaser.Scene {
     private pressedPoint!: Phaser.Types.Math.Vector2Like
     private isDragging = false;
 
-    private score!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
+    private score!: Phaser.GameObjects.Group
+    private scoreTimer!: Phaser.Time.TimerEvent
 
     private debText!: Phaser.GameObjects.Text
 
@@ -25,8 +26,8 @@ export class MainScene extends Phaser.Scene {
 
     create() {
         this.actor = new Player(this, 100, 100)
-
-        this.placeScore()
+        this.score = this.add.group()
+        this.scoreTimer = this.time.delayedCall(2 * 1000, this.addScore, [], this)
 
         this.cursors = this.input.keyboard?.createCursorKeys()
 
@@ -101,18 +102,19 @@ export class MainScene extends Phaser.Scene {
             this.actor.setVelocity({ x: -1, y: 0 })
         }
 
-        if (this.physics.overlap(this.actor, this.score)) {
-            this.placeScore()
+        if (this.physics.overlap(this.actor, this.score, (actor, score) => {
+            this.score.remove(score as Phaser.GameObjects.GameObject)
+            score.destroy(true)
+        })) {
+            //
         }
     }
 
-    placeScore() {
+    addScore() {
         const x = Phaser.Math.Between(0, this.scale.width)
         const y = Phaser.Math.Between(0, this.scale.height)
-        if (!this.score) {
-            this.score = this.physics.add.sprite(x, y, 'score')
-        } else {
-            this.score.setPosition(x, y)
-        }
+        const score = this.physics.add.sprite(x, y, 'score')
+        this.score.add(score, true)
+        this.scoreTimer.reset({ delay: 2 * 1000, callback: this.addScore, callbackScope: this })
     }
 }
