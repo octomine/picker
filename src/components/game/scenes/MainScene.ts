@@ -9,6 +9,8 @@ export class MainScene extends Phaser.Scene {
     private pressedPoint!: Phaser.Types.Math.Vector2Like
     private isDragging = false;
 
+    private score!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
+
     private debText!: Phaser.GameObjects.Text
 
     constructor() {
@@ -17,10 +19,14 @@ export class MainScene extends Phaser.Scene {
 
     preload() {
         this.load.image('penta', 'assets/img.png');
+        this.load.image('score', 'assets/score.png');
+        this.load.image('penalty', 'assets/penalty.png');
     }
 
     create() {
         this.actor = new Player(this, 100, 100)
+
+        this.placeScore()
 
         this.cursors = this.input.keyboard?.createCursorKeys()
 
@@ -93,6 +99,20 @@ export class MainScene extends Phaser.Scene {
         }
         if (this.cursors?.left.isDown) {
             this.actor.setVelocity({ x: -1, y: 0 })
+        }
+
+        if (this.physics.overlap(this.actor, this.score)) {
+            this.placeScore()
+        }
+    }
+
+    placeScore() {
+        const x = Phaser.Math.Between(0, this.scale.width)
+        const y = Phaser.Math.Between(0, this.scale.height)
+        if (!this.score) {
+            this.score = this.physics.add.sprite(x, y, 'score')
+        } else {
+            this.score.setPosition(x, y)
         }
     }
 }
