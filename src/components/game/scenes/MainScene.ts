@@ -103,6 +103,7 @@ export class MainScene extends Phaser.Scene {
         }
 
         if (this.physics.overlap(this.actor, this.score, (actor, score) => {
+            console.log(actor);
             this.score.remove(score as Phaser.GameObjects.GameObject)
             score.destroy(true)
         })) {
