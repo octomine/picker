@@ -1,10 +1,11 @@
-import { BASE_DRAG, MIN_DIST, BASE_VELOCITY } from "../constants";
+import { MIN_DIST } from "../constants";
+import { Player } from "../entities";
 
 export class MainScene extends Phaser.Scene {
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
 
-    private actor!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
-    private currentVelocity: Phaser.Types.Math.Vector2Like = { x: 0, y: 0 }
+    private actor!: Player
+    private direction: Phaser.Types.Math.Vector2Like = { x: 0, y: 0 }
     private pressedPoint!: Phaser.Types.Math.Vector2Like
     private isDragging = false;
 
@@ -19,8 +20,7 @@ export class MainScene extends Phaser.Scene {
     }
 
     create() {
-        this.actor = this.physics.add.sprite(100, 100, 'penta')
-        this.actor.setDrag(BASE_DRAG)
+        this.actor = new Player(this, 100, 100)
 
         this.cursors = this.input.keyboard?.createCursorKeys()
 
@@ -35,7 +35,8 @@ export class MainScene extends Phaser.Scene {
         this.input.on(Phaser.Input.Events.POINTER_UP, () => {
             this.debText.setText('UP')
             this.isDragging = false
-            this.changeVelocity({ x: 0, y: 0 })
+            this.direction = { x: 0, y: 0 }
+            this.actor.setVelocity(this.direction)
         }, this)
 
         this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
@@ -49,10 +50,11 @@ export class MainScene extends Phaser.Scene {
                     const xx = Math.abs(dx)
                     const yy = Math.abs(dy)
                     if (yy > xx) {
-                        this.changeVelocity({ x: 0, y: Math.sign(dy) * BASE_VELOCITY })
+                        this.direction = { x: 0, y: Math.sign(dy) }
                     } else {
-                        this.changeVelocity({ x: Math.sign(dx) * BASE_VELOCITY, y: 0 })
+                        this.direction = { x: Math.sign(dx), y: 0 }
                     }
+                    this.actor.setVelocity(this.direction)
                 } else {
                     this.pressedPoint = { x, y }
                 }
@@ -60,7 +62,8 @@ export class MainScene extends Phaser.Scene {
         }, this)
 
         this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_UP, () => {
-            this.changeVelocity({ x: 0, y: 0 })
+            this.direction = { x: 0, y: 0 }
+            this.actor.setVelocity(this.direction)
         }, this)
 
         this.scale.addListener(Phaser.Scale.Events.RESIZE, ({ width, height }: { width: number, height: number }) => {
@@ -75,25 +78,21 @@ export class MainScene extends Phaser.Scene {
     }
 
     update() {
-        if (this.currentVelocity.x !== 0 || this.currentVelocity.y !== 0) {
-            this.actor.body.setVelocity(this.currentVelocity.x, this.currentVelocity.y)
+        if (this.direction.x !== 0 || this.direction.y !== 0) {
+            this.actor.setVelocity(this.direction)
         }
 
         if (this.cursors?.down.isDown) {
-            this.changeVelocity({ x: 0, y: BASE_VELOCITY })
+            this.actor.setVelocity({ x: 0, y: 1 })
         }
         if (this.cursors?.up.isDown) {
-            this.changeVelocity({ x: 0, y: -BASE_VELOCITY })
+            this.actor.setVelocity({ x: 0, y: -1 })
         }
         if (this.cursors?.right.isDown) {
-            this.changeVelocity({ x: BASE_VELOCITY, y: 0 })
+            this.actor.setVelocity({ x: 1, y: 0 })
         }
         if (this.cursors?.left.isDown) {
-            this.changeVelocity({ x: -BASE_VELOCITY, y: 0 })
+            this.actor.setVelocity({ x: -1, y: 0 })
         }
-    }
-
-    changeVelocity(v: Phaser.Types.Math.Vector2Like) {
-        this.currentVelocity = v
     }
 }
