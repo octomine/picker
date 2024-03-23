@@ -1,5 +1,4 @@
 import { BASE_DRAG, BASE_VELOCITY } from "../constants"
-import { TPlayerVelocity } from "./Player.types"
 
 class Player extends Phaser.GameObjects.Sprite {
     private currentVelocity = BASE_VELOCITY
@@ -14,7 +13,7 @@ class Player extends Phaser.GameObjects.Sprite {
         this.cBody.setDrag(BASE_DRAG)
     }
 
-    setVelocity({ x, y }: TPlayerVelocity) {
+    setVelocity({ x, y }: Phaser.Types.Math.Vector2Like) {
         this.cBody.setVelocity(x * this.currentVelocity, y * this.currentVelocity)
     }
 
