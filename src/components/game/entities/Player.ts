@@ -2,13 +2,15 @@ import { BASE_DRAG, BASE_VELOCITY } from "../constants"
 
 class Player extends Phaser.GameObjects.Sprite {
     constructor(scene: Phaser.Scene, x: number, y: number) {
-        super(scene, x, y, 'penta')
+        super(scene, x, y, 'char')
 
         this.scene = scene
         this.scene.add.existing(this)
         this.scene.physics.world.enableBody(this, Phaser.Physics.Arcade.DYNAMIC_BODY)
 
         this.cBody.setDrag(BASE_DRAG)
+
+        this.play('walkRight')
     }
 
     setVelocity({ x, y }: Phaser.Types.Math.Vector2Like) {
