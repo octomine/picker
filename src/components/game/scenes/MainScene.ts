@@ -28,9 +28,33 @@ export class MainScene extends Phaser.Scene {
     create() {
         this.anims.create({
             key: 'walkRight',
-            frames: this.anims.generateFrameNumbers('player'),
+            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 4 }),
             frameRate: 20,
             repeat: -1,
+        })
+        this.anims.create({
+            key: 'walkLeft',
+            frames: this.anims.generateFrameNumbers('player', { start: 5, end: 9 }),
+            frameRate: 20,
+            repeat: -1,
+        })
+        this.anims.create({
+            key: 'walkDown',
+            frames: this.anims.generateFrameNumbers('player', { start: 10, end: 14 }),
+            frameRate: 20,
+            repeat: -1,
+        })
+        this.anims.create({
+            key: 'walkUp',
+            frames: this.anims.generateFrameNumbers('player', { start: 15, end: 19 }),
+            frameRate: 20,
+            repeat: -1,
+        })
+        this.anims.create({
+            key: 'stay',
+            frames: this.anims.generateFrameNumbers('player', { start: 10, end: 10 }),
+            frameRate: 20,
+            repeat: 0,
         })
         this.actor = new Player(this, 100, 100)
 
@@ -94,8 +118,13 @@ export class MainScene extends Phaser.Scene {
     }
 
     update() {
-        if (this.direction.x !== 0 || this.direction.y !== 0) {
+        const { x, y } = this.direction
+        if (x !== 0 || y !== 0) {
             this.actor.setVelocity(this.direction)
+        }
+
+        if (x === 0 && y === 0) {
+            this.actor.checkVelocity()
         }
 
         if (this.cursors?.down.isDown) {
