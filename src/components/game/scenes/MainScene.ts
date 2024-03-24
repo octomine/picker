@@ -10,7 +10,8 @@ export class MainScene extends Phaser.Scene {
     private isDragging = false;
 
     private score!: Phaser.GameObjects.Group
-    private scoreTimer!: Phaser.Time.TimerEvent
+    private penalty!: Phaser.GameObjects.Group
+    private gameTimer!: Phaser.Time.TimerEvent
 
     private debText!: Phaser.GameObjects.Text
 
@@ -27,7 +28,8 @@ export class MainScene extends Phaser.Scene {
     create() {
         this.actor = new Player(this, 100, 100)
         this.score = this.add.group()
-        this.scoreTimer = this.time.delayedCall(2 * 1000, this.addScore, [], this)
+        this.penalty = this.add.group()
+        this.gameTimer = this.time.delayedCall(2 * 1000, this.addObj, [], this)
 
         this.cursors = this.input.keyboard?.createCursorKeys()
 
@@ -43,7 +45,6 @@ export class MainScene extends Phaser.Scene {
             this.debText.setText('UP')
             this.isDragging = false
             this.direction = { x: 0, y: 0 }
-            this.actor.setVelocity(this.direction)
         }, this)
 
         this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
@@ -70,7 +71,6 @@ export class MainScene extends Phaser.Scene {
 
         this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_UP, () => {
             this.direction = { x: 0, y: 0 }
-            this.actor.setVelocity(this.direction)
         }, this)
 
         this.scale.addListener(Phaser.Scale.Events.RESIZE, ({ width, height }: { width: number, height: number }) => {
@@ -82,6 +82,8 @@ export class MainScene extends Phaser.Scene {
         }, this)
 
         this.debText = this.add.text(0, 0, 'deb', { fontSize: '20px', color: '#ffffff' })
+
+        this.resetGame()
     }
 
     update() {
@@ -109,13 +111,31 @@ export class MainScene extends Phaser.Scene {
         })) {
             //
         }
+
+        if (this.physics.overlap(this.actor, this.penalty)) {
+            this.resetGame()
+        }
     }
 
-    addScore() {
+    addObj() {
+        const rnd = Phaser.Math.Between(0, 10)
+        const type = rnd < 5 ? 'score' : 'penalty'
         const x = Phaser.Math.Between(0, this.scale.width)
         const y = Phaser.Math.Between(0, this.scale.height)
-        const score = this.physics.add.sprite(x, y, 'score')
-        this.score.add(score, true)
-        this.scoreTimer.reset({ delay: 2 * 1000, callback: this.addScore, callbackScope: this })
+        const obj = this.physics.add.sprite(x, y, type)
+        if (type === 'score') {
+            this.score.add(obj, true)
+        } else {
+            this.penalty.add(obj, true)
+        }
+        this.gameTimer.reset({ delay: 2 * 1000, callback: this.addObj, callbackScope: this })
+    }
+
+    resetGame() {
+        this.score.clear(true, true)
+        this.penalty.clear(true, true)
+
+        const { width, height } = this.scale
+        this.actor.setPosition(width / 2, height / 2)
     }
 }
