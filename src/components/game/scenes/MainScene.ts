@@ -20,13 +20,20 @@ export class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('penta', 'assets/img.png');
+        this.load.spritesheet('player', 'assets/char.png', { frameWidth: 70, frameHeight: 100 });
         this.load.image('score', 'assets/score.png');
         this.load.image('penalty', 'assets/penalty.png');
     }
 
     create() {
+        this.anims.create({
+            key: 'walkRight',
+            frames: this.anims.generateFrameNumbers('player'),
+            frameRate: 20,
+            repeat: -1,
+        })
         this.actor = new Player(this, 100, 100)
+
         this.score = this.add.group()
         this.penalty = this.add.group()
         this.gameTimer = this.time.delayedCall(2 * 1000, this.addObj, [], this)
