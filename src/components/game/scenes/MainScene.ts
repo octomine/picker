@@ -13,6 +13,11 @@ export class MainScene extends Phaser.Scene {
   private penalty!: Phaser.GameObjects.Group
   private gameTimer!: Phaser.Time.TimerEvent
 
+  private currentScore = 0
+  private level = 1
+  private rest = 3
+  private collected = 0
+
   private coeffDelay = 1
 
   private debText!: Phaser.GameObjects.Text
@@ -140,16 +145,32 @@ export class MainScene extends Phaser.Scene {
     }
 
     // *** COLLISIONS ***
+    // score
     if (this.physics.overlap(this.actor, this.score, (actor, score) => {
       console.log(actor);
       this.coeffDelay = Math.max(this.coeffDelay - DELAY_STEP, .1)
       this.score.remove(score as Phaser.GameObjects.GameObject)
       score.destroy(true)
+
+      this.currentScore += 10
+      this.collected ++
+      if (this.collected >= 10) {
+        this.resetGame()
+        this.level ++
+      }
+      this.updateInfo()
     })) {
-      this.debText.setText(`${DELAY * this.coeffDelay}`)
+      // this.debText.setText(`${DELAY * this.coeffDelay}`)
     }
 
+    // penalty
     if (this.physics.overlap(this.actor, this.penalty)) {
+      this.rest--
+      if (this.rest <= 0) {
+        this.rest = 3
+        this.currentScore = 0
+        this.level = 1
+      }
       this.resetGame()
     }
   }
@@ -174,11 +195,22 @@ export class MainScene extends Phaser.Scene {
 
   resetGame() {
     this.coeffDelay = 1
+    this.collected = 0
 
     this.score.clear(true, true)
     this.penalty.clear(true, true)
 
     const { width, height } = this.scale
     this.actor.setPosition(width / 2, height / 2)
+
+    this.updateInfo()
+  }
+
+  updateInfo() {
+    this.debText.setText([
+      `level: ${this.level}`,
+      `score: ${this.currentScore}`,
+      `rest: ${this.rest}`,
+    ])
   }
 }
