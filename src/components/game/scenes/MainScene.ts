@@ -1,4 +1,4 @@
-import { MIN_DIST } from "../constants";
+import { DELAY, DELAY_STEP, MIN_DIST } from "../constants";
 import { Player } from "../entities";
 
 export class MainScene extends Phaser.Scene {
@@ -12,6 +12,8 @@ export class MainScene extends Phaser.Scene {
   private score!: Phaser.GameObjects.Group
   private penalty!: Phaser.GameObjects.Group
   private gameTimer!: Phaser.Time.TimerEvent
+
+  private coeffDelay = 1
 
   private debText!: Phaser.GameObjects.Text
 
@@ -60,20 +62,18 @@ export class MainScene extends Phaser.Scene {
 
     this.score = this.add.group()
     this.penalty = this.add.group()
-    this.gameTimer = this.time.delayedCall(2 * 1000, this.addObj, [], this)
+    this.gameTimer = this.time.delayedCall(DELAY, this.addObj, [], this)
 
     this.cursors = this.input.keyboard?.createCursorKeys()
 
     this.input.addPointer(9)
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-      this.debText.setText('DOWN')
       this.isDragging = true
       const { x, y } = pointer
       this.pressedPoint = { x, y }
     }, this)
 
     this.input.on(Phaser.Input.Events.POINTER_UP, () => {
-      this.debText.setText('UP')
       this.isDragging = false
       this.direction = { x: 0, y: 0 }
     }, this)
@@ -83,7 +83,6 @@ export class MainScene extends Phaser.Scene {
         const { position, prevPosition, x, y } = pointer
         const dist = position.distance(prevPosition)
         if (dist > MIN_DIST) {
-          this.debText.setText('MOVE')
           const dx = x - this.pressedPoint.x
           const dy = y - this.pressedPoint.y
           const xx = Math.abs(dx)
@@ -140,12 +139,14 @@ export class MainScene extends Phaser.Scene {
       this.actor.setVelocity({ x: -1, y: 0 })
     }
 
+    // *** COLLISIONS ***
     if (this.physics.overlap(this.actor, this.score, (actor, score) => {
       console.log(actor);
+      this.coeffDelay = Math.max(this.coeffDelay - DELAY_STEP, .1)
       this.score.remove(score as Phaser.GameObjects.GameObject)
       score.destroy(true)
     })) {
-      //
+      this.debText.setText(`${DELAY * this.coeffDelay}`)
     }
 
     if (this.physics.overlap(this.actor, this.penalty)) {
@@ -164,10 +165,16 @@ export class MainScene extends Phaser.Scene {
     } else {
       this.penalty.add(obj, true)
     }
-    this.gameTimer.reset({ delay: 2 * 1000, callback: this.addObj, callbackScope: this })
+    this.gameTimer.reset({
+      delay: DELAY * this.coeffDelay,
+      callback: this.addObj,
+      callbackScope: this
+    })
   }
 
   resetGame() {
+    this.coeffDelay = 1
+
     this.score.clear(true, true)
     this.penalty.clear(true, true)
 
