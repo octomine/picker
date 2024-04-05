@@ -153,10 +153,10 @@ export class MainScene extends Phaser.Scene {
       score.destroy(true)
 
       this.currentScore += 10
-      this.collected ++
+      this.collected++
       if (this.collected >= 10) {
         this.resetGame()
-        this.level ++
+        this.level++
       }
       this.updateInfo()
     })) {
@@ -184,6 +184,8 @@ export class MainScene extends Phaser.Scene {
     if (type === 'score') {
       this.score.add(obj, true)
     } else {
+      const scale = .1 * Phaser.Math.Between(5, 12)
+      obj.setScale(scale)
       this.penalty.add(obj, true)
     }
     this.gameTimer.reset({
