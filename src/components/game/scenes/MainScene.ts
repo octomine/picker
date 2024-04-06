@@ -47,6 +47,8 @@ export class MainScene extends Phaser.Scene {
     this.gameTimer = this.time.delayedCall(DELAY, this.addObj, [], this)
 
     this.modifier = new Modifier(this)
+    this.modifier.visible = false
+    console.log(this.modifier);
     this.modifierTimer = this.time.delayedCall(MODIFIER_DELAY, this.addModifier, [], this)
 
     this.cursors = this.input.keyboard?.createCursorKeys()
@@ -153,6 +155,11 @@ export class MainScene extends Phaser.Scene {
       }
       this.resetGame()
     }
+
+    // modifier
+    if (this.physics.overlap(this.actor, this.modifier) && this.modifier.visible) {
+      this.removeModifier()
+    }
   }
 
   addObj() {
@@ -177,16 +184,21 @@ export class MainScene extends Phaser.Scene {
   addModifier() {
     const { x, y } = this.getRandom()
     this.modifier.setPosition(x, y)
-    this.add.existing(this.modifier)
+    this.modifier.visible = true
     this.modifierTimer.reset({
       delay: MODIFIER_WAIT,
-      callback: () => { },
+      callback: this.removeModifier,
       callbackScope: this
     })
   }
 
   removeModifier() {
-    // this.
+    this.modifier.visible = false;
+    this.modifierTimer.reset({
+      delay: MODIFIER_DELAY,
+      callback: this.addModifier,
+      callbackScope: this
+    })
   }
 
   resetGame() {

@@ -1,4 +1,6 @@
-class Modifier extends Phaser.GameObjects.Sprite {
+import { Entity } from "."
+
+class Modifier extends Entity {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0, 'modifier')
   }
