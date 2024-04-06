@@ -1,12 +1,9 @@
+import { Entity } from "."
 import { BASE_DRAG, BASE_VELOCITY, MIN_VELOCITY } from "../constants"
 
-class Player extends Phaser.GameObjects.Sprite {
+class Player extends Entity {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player', 10)
-
-    this.scene = scene
-    this.scene.add.existing(this)
-    this.scene.physics.world.enableBody(this, Phaser.Physics.Arcade.DYNAMIC_BODY)
 
     this.cBody.setSize(60, 90)
     this.cBody.setDrag(BASE_DRAG)
