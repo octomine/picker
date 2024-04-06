@@ -1,5 +1,6 @@
-import { DELAY, DELAY_STEP, MIN_DIST } from "../constants";
-import { Player } from "../entities";
+import { DELAY, DELAY_STEP, MIN_DIST, MODIFIER_DELAY, MODIFIER_WAIT } from "../constants";
+import { Modifier, Player } from "../entities";
+import { createAnimations } from "./";
 
 export class MainScene extends Phaser.Scene {
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
@@ -12,6 +13,9 @@ export class MainScene extends Phaser.Scene {
   private score!: Phaser.GameObjects.Group
   private penalty!: Phaser.GameObjects.Group
   private gameTimer!: Phaser.Time.TimerEvent
+
+  private modifier!: Modifier
+  private modifierTimer!: Phaser.Time.TimerEvent
 
   private currentScore = 0
   private level = 1
@@ -30,44 +34,20 @@ export class MainScene extends Phaser.Scene {
     this.load.spritesheet('player', 'assets/char.png', { frameWidth: 70, frameHeight: 100 });
     this.load.image('score', 'assets/score.png');
     this.load.image('penalty', 'assets/penalty.png');
+    this.load.image('modifier', 'assets/modifier.png');
   }
 
   create() {
-    this.anims.create({
-      key: 'walkRight',
-      frames: this.anims.generateFrameNumbers('player', { start: 0, end: 4 }),
-      frameRate: 20,
-      repeat: -1,
-    })
-    this.anims.create({
-      key: 'walkLeft',
-      frames: this.anims.generateFrameNumbers('player', { start: 5, end: 9 }),
-      frameRate: 20,
-      repeat: -1,
-    })
-    this.anims.create({
-      key: 'walkDown',
-      frames: this.anims.generateFrameNumbers('player', { start: 10, end: 14 }),
-      frameRate: 20,
-      repeat: -1,
-    })
-    this.anims.create({
-      key: 'walkUp',
-      frames: this.anims.generateFrameNumbers('player', { start: 15, end: 19 }),
-      frameRate: 20,
-      repeat: -1,
-    })
-    this.anims.create({
-      key: 'stay',
-      frames: this.anims.generateFrameNumbers('player', { start: 10, end: 10 }),
-      frameRate: 20,
-      repeat: 0,
-    })
+    createAnimations(this.anims)
+
     this.actor = new Player(this, 100, 100)
 
     this.score = this.add.group()
     this.penalty = this.add.group()
     this.gameTimer = this.time.delayedCall(DELAY, this.addObj, [], this)
+
+    this.modifier = new Modifier(this)
+    this.modifierTimer = this.time.delayedCall(MODIFIER_DELAY, this.addModifier, [], this)
 
     this.cursors = this.input.keyboard?.createCursorKeys()
 
@@ -178,8 +158,7 @@ export class MainScene extends Phaser.Scene {
   addObj() {
     const rnd = Phaser.Math.Between(0, 10)
     const type = rnd < 5 ? 'score' : 'penalty'
-    const x = Phaser.Math.Between(0, this.scale.width)
-    const y = Phaser.Math.Between(0, this.scale.height)
+    const { x, y } = this.getRandom()
     const obj = this.physics.add.sprite(x, y, type)
     if (type === 'score') {
       this.score.add(obj, true)
@@ -195,6 +174,21 @@ export class MainScene extends Phaser.Scene {
     })
   }
 
+  addModifier() {
+    const { x, y } = this.getRandom()
+    this.modifier.setPosition(x, y)
+    this.add.existing(this.modifier)
+    this.modifierTimer.reset({
+      delay: MODIFIER_WAIT,
+      callback: () => { },
+      callbackScope: this
+    })
+  }
+
+  removeModifier() {
+    // this.
+  }
+
   resetGame() {
     this.coeffDelay = 1
     this.collected = 0
@@ -206,6 +200,13 @@ export class MainScene extends Phaser.Scene {
     this.actor.setPosition(width / 2, height / 2)
 
     this.updateInfo()
+  }
+
+  getRandom(): Phaser.Types.Math.Vector2Like {
+    return {
+      x: Phaser.Math.Between(0, this.scale.width),
+      y: Phaser.Math.Between(0, this.scale.height),
+    }
   }
 
   updateInfo() {
