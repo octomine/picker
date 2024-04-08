@@ -1,9 +1,10 @@
-import { DELAY, DELAY_STEP, MIN_DIST, MODIFIER_DELAY, MODIFIER_WAIT } from "../constants";
-import { Modifier, Player } from "../entities";
+import { DELAY, DELAY_STEP, MIN_DIST, MODIFIER_DELAY, MODIFIER_WAIT } from "../../constants";
+import { Modifier, Player } from "../../entities";
 import { createAnimations } from "./";
 
 export class MainScene extends Phaser.Scene {
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
+  private freeze = false
 
   private actor!: Player
   private direction: Phaser.Types.Math.Vector2Like = { x: 0, y: 0 }
@@ -46,9 +47,6 @@ export class MainScene extends Phaser.Scene {
     this.penalty = this.add.group()
     this.gameTimer = this.time.delayedCall(DELAY, this.addObj, [], this)
 
-    this.modifier = new Modifier(this)
-    this.modifier.visible = false
-    console.log(this.modifier);
     this.modifierTimer = this.time.delayedCall(MODIFIER_DELAY, this.addModifier, [], this)
 
     this.cursors = this.input.keyboard?.createCursorKeys()
@@ -104,6 +102,10 @@ export class MainScene extends Phaser.Scene {
   }
 
   update() {
+    if (this.freeze) {
+      return
+    }
+
     const { x, y } = this.direction
     if (x !== 0 || y !== 0) {
       this.actor.setVelocity(this.direction)
@@ -129,7 +131,7 @@ export class MainScene extends Phaser.Scene {
     // *** COLLISIONS ***
     // score
     if (this.physics.overlap(this.actor, this.score, (actor, score) => {
-      console.log(actor);
+      this.actor.score()
       this.coeffDelay = Math.max(this.coeffDelay - DELAY_STEP, .1)
       this.score.remove(score as Phaser.GameObjects.GameObject)
       score.destroy(true)
@@ -147,13 +149,14 @@ export class MainScene extends Phaser.Scene {
 
     // penalty
     if (this.physics.overlap(this.actor, this.penalty)) {
+      this.freeze = true
       this.rest--
       if (this.rest <= 0) {
         this.rest = 3
         this.currentScore = 0
         this.level = 1
       }
-      this.resetGame()
+      this.actor.damage(this.resetGame)
     }
 
     // modifier
@@ -182,9 +185,9 @@ export class MainScene extends Phaser.Scene {
   }
 
   addModifier() {
+    this.modifier = new Modifier(this)
     const { x, y } = this.getRandom()
     this.modifier.setPosition(x, y)
-    this.modifier.visible = true
     this.modifierTimer.reset({
       delay: MODIFIER_WAIT,
       callback: this.removeModifier,
@@ -193,7 +196,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   removeModifier() {
-    this.modifier.visible = false;
+    this.modifier.destroy()
     this.modifierTimer.reset({
       delay: MODIFIER_DELAY,
       callback: this.addModifier,
@@ -210,8 +213,10 @@ export class MainScene extends Phaser.Scene {
 
     const { width, height } = this.scale
     this.actor.setPosition(width / 2, height / 2)
+    this.actor.setAlpha(1)
 
     this.updateInfo()
+    this.freeze = false
   }
 
   getRandom(): Phaser.Types.Math.Vector2Like {

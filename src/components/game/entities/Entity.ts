@@ -4,7 +4,7 @@ class Entity extends Phaser.GameObjects.Sprite {
 
     this.scene = scene;
     this.scene.add.existing(this)
-    this.scene.physics.world.enableBody(this, Phaser.Physics.Arcade.DYNAMIC_BODY)
+    this.scene.physics.add.existing(this)
   }
 }
 
