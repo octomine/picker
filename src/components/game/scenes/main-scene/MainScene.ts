@@ -1,5 +1,6 @@
 import { DELAY, DELAY_STEP, MIN_DIST, MODIFIER_DELAY, MODIFIER_WAIT } from "../../constants";
 import { Modifier, Player } from "../../entities";
+import Score from "../../entities/Score";
 import { createAnimations } from "./";
 
 export class MainScene extends Phaser.Scene {
@@ -11,11 +12,11 @@ export class MainScene extends Phaser.Scene {
   private pressedPoint!: Phaser.Types.Math.Vector2Like
   private isDragging = false;
 
-  private score!: Phaser.GameObjects.Group
-  private penalty!: Phaser.GameObjects.Group
-  private gameTimer!: Phaser.Time.TimerEvent
+  private scoreGrp!: Phaser.GameObjects.Group
+  private penaltyGrp!: Phaser.GameObjects.Group
+  private modifierGrp!: Phaser.GameObjects.Group
 
-  private modifier!: Modifier
+  private gameTimer!: Phaser.Time.TimerEvent
   private modifierTimer!: Phaser.Time.TimerEvent
 
   private currentScore = 0
@@ -43,10 +44,11 @@ export class MainScene extends Phaser.Scene {
 
     this.actor = new Player(this, 100, 100)
 
-    this.score = this.add.group()
-    this.penalty = this.add.group()
-    this.gameTimer = this.time.delayedCall(DELAY, this.addObj, [], this)
+    this.scoreGrp = this.add.group()
+    this.penaltyGrp = this.add.group()
+    this.modifierGrp = this.add.group()
 
+    this.gameTimer = this.time.delayedCall(DELAY, this.addObj, [], this)
     this.modifierTimer = this.time.delayedCall(MODIFIER_DELAY, this.addModifier, [], this)
 
     this.cursors = this.input.keyboard?.createCursorKeys()
@@ -130,25 +132,35 @@ export class MainScene extends Phaser.Scene {
 
     // *** COLLISIONS ***
     // score
-    if (this.physics.overlap(this.actor, this.score, (actor, score) => {
+    if (this.physics.overlap(this.actor, this.scoreGrp, (actor, score) => {
       (actor as Player).score()
+      const cScore = score as Score
+      this.scoreGrp.remove(cScore)
+      cScore.collect()
+    })) {
       this.coeffDelay = Math.max(this.coeffDelay - DELAY_STEP, .1)
-      this.score.remove(score as Phaser.GameObjects.GameObject)
-      score.destroy(true)
-
       this.currentScore += 10
-      this.collected++
+      this.collected ++
       if (this.collected >= 10) {
         this.resetGame()
         this.level++
       }
       this.updateInfo()
+    }
+
+    // modifier
+    if (this.physics.overlap(this.actor, this.modifierGrp, (actor, modifier) => {
+      console.log(actor);
+      const cModifier = modifier as Modifier;
+      this.modifierGrp.remove(cModifier)
+      cModifier.collect()
+      this.coeffDelay = Math.max(this.coeffDelay + DELAY_STEP, 1)
     })) {
-      // this.debText.setText(`${DELAY * this.coeffDelay}`)
+      this.resetModifierTimer()
     }
 
     // penalty
-    if (this.physics.overlap(this.actor, this.penalty)) {
+    if (this.physics.overlap(this.actor, this.penaltyGrp)) {
       this.freeze = true
       this.rest--
       if (this.rest <= 0) {
@@ -158,24 +170,21 @@ export class MainScene extends Phaser.Scene {
       }
       this.actor.damage(this.resetGame)
     }
-
-    // modifier
-    if (this.physics.overlap(this.actor, this.modifier) && this.modifier.visible) {
-      this.removeModifier()
-    }
   }
 
   addObj() {
     const rnd = Phaser.Math.Between(0, 10)
     const type = rnd < 5 ? 'score' : 'penalty'
     const { x, y } = this.getRandom()
-    const obj = this.physics.add.sprite(x, y, type)
+    const obj = type === 'score'
+      ? this.physics.add.existing(new Score(this, x, y))
+      : this.physics.add.sprite(x, y, type)
     if (type === 'score') {
-      this.score.add(obj, true)
+      this.scoreGrp.add(obj, true)
     } else {
       const scale = .1 * Phaser.Math.Between(5, 12)
       obj.setScale(scale)
-      this.penalty.add(obj, true)
+      this.penaltyGrp.add(obj, true)
     }
     this.gameTimer.reset({
       delay: DELAY * this.coeffDelay,
@@ -185,18 +194,20 @@ export class MainScene extends Phaser.Scene {
   }
 
   addModifier() {
-    this.modifier = new Modifier(this)
+    const modifier = new Modifier(this)
     const { x, y } = this.getRandom()
-    this.modifier.setPosition(x, y)
+    modifier.setPosition(x, y)
+    this.modifierGrp.add(modifier)
+
     this.modifierTimer.reset({
       delay: MODIFIER_WAIT,
-      callback: this.removeModifier,
+      callback: this.resetModifierTimer,
       callbackScope: this
     })
   }
 
-  removeModifier() {
-    this.modifier.destroy()
+  resetModifierTimer() {
+    this.modifierGrp.clear(true, true)
     this.modifierTimer.reset({
       delay: MODIFIER_DELAY,
       callback: this.addModifier,
@@ -208,8 +219,8 @@ export class MainScene extends Phaser.Scene {
     this.coeffDelay = 1
     this.collected = 0
 
-    this.score.clear(true, true)
-    this.penalty.clear(true, true)
+    this.scoreGrp.clear(true, true)
+    this.penaltyGrp.clear(true, true)
 
     const { width, height } = this.scale
     this.actor.setPosition(width / 2, height / 2)
