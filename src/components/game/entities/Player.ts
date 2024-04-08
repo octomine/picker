@@ -48,6 +48,28 @@ class Player extends Entity {
     }
   }
 
+  damage(callback: () => void) {
+    this.cBody.setVelocity(0)
+    this.play('stay')
+    this.scene.tweens.add({
+      targets: this,
+      duration: 100,
+      repeat: 3,
+      alpha: .25,
+      callbackScope: this.scene,
+      onComplete: callback,
+    })
+  }
+
+  score() {
+    this.scene.tweens.add({
+      targets: this,
+      duration: 100,
+      scale: 1.2,
+      yoyo: true,
+    })
+  }
+
   get cBody() {
     return this.body as Phaser.Physics.Arcade.Body
   }
