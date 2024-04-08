@@ -48,7 +48,7 @@ class Player extends Entity {
     }
   }
 
-  damage(callback: () => void) {
+  damage(onComplete: () => void) {
     this.cBody.setVelocity(0)
     this.play('stay')
     this.scene.tweens.add({
@@ -57,7 +57,7 @@ class Player extends Entity {
       repeat: 3,
       alpha: .25,
       callbackScope: this.scene,
-      onComplete: callback,
+      onComplete,
     })
   }
 
