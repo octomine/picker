@@ -131,7 +131,7 @@ export class MainScene extends Phaser.Scene {
     // *** COLLISIONS ***
     // score
     if (this.physics.overlap(this.actor, this.score, (actor, score) => {
-      this.actor.score()
+      (actor as Player).score()
       this.coeffDelay = Math.max(this.coeffDelay - DELAY_STEP, .1)
       this.score.remove(score as Phaser.GameObjects.GameObject)
       score.destroy(true)
