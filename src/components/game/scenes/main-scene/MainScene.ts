@@ -166,10 +166,12 @@ export class MainScene extends Phaser.Scene {
     if (this.physics.overlap(this.actor, this.penaltyGrp)) {
       this.freeze = true
       this.rest--
-      if (this.rest <= 0) {
+      if (this.rest === 0) {
+        this.actor.damage()
         this.gameOver()
+      } else {
+        this.actor.damage(this.resetGame)
       }
-      this.actor.damage(this.resetGame)
     }
   }
 
@@ -229,24 +231,30 @@ export class MainScene extends Phaser.Scene {
     this.msgText.visible = false
 
     this.updateInfo()
-    this.freeze = false
+    if (this.level === 0) {
+      this.levelUp()
+    } else {
+      this.freeze = false
+    }
   }
 
   showMessage(msg: string, onComplete: () => void, completeDelay = 1000) {
     this.freeze = true
+
     const { width, height } = this.scale
     this.msgText.setPosition(width / 2, height / 2)
     this.msgText.visible = true
     this.msgText.setText(msg)
+
     this.tweens.add({
       targets: this.msgText,
       duration: 70,
       alpha: 0,
       yoyo: true,
-      completeDelay,
       repeat: 3,
-      onComplete,
       callbackScope: this,
+      completeDelay,
+      onComplete,
     })
   }
 

@@ -7,6 +7,7 @@ class Player extends Entity {
 
     this.cBody.setSize(60, 90)
     this.cBody.setDrag(BASE_DRAG)
+    this.cBody.setCollideWorldBounds(true)
 
     this.state = 0
     this.play('stay')
@@ -48,7 +49,7 @@ class Player extends Entity {
     }
   }
 
-  damage(onComplete: () => void) {
+  damage(onComplete = () => { /*  */ }) {
     this.cBody.setVelocity(0)
     this.play('stay')
     this.scene.tweens.add({
