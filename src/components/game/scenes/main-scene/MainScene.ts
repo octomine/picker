@@ -166,10 +166,12 @@ export class MainScene extends Phaser.Scene {
     if (this.physics.overlap(this.actor, this.penaltyGrp)) {
       this.freeze = true
       this.rest--
-      if (this.rest <= 0) {
+      if (this.rest === 0) {
+        this.actor.damage()
         this.gameOver()
+      } else {
+        this.actor.damage(this.resetGame)
       }
-      this.actor.damage(this.resetGame)
     }
   }
 
