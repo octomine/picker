@@ -229,24 +229,30 @@ export class MainScene extends Phaser.Scene {
     this.msgText.visible = false
 
     this.updateInfo()
-    this.freeze = false
+    if (this.level === 0) {
+      this.levelUp()
+    } else {
+      this.freeze = false
+    }
   }
 
   showMessage(msg: string, onComplete: () => void, completeDelay = 1000) {
     this.freeze = true
+
     const { width, height } = this.scale
     this.msgText.setPosition(width / 2, height / 2)
     this.msgText.visible = true
     this.msgText.setText(msg)
+
     this.tweens.add({
       targets: this.msgText,
       duration: 70,
       alpha: 0,
       yoyo: true,
-      completeDelay,
       repeat: 3,
-      onComplete,
       callbackScope: this,
+      completeDelay,
+      onComplete,
     })
   }
 
