@@ -20,12 +20,13 @@ export class MainScene extends Phaser.Scene {
   private modifierTimer!: Phaser.Time.TimerEvent
 
   private currentScore = 0
-  private level = 1
+  private level = 0
   private rest = 3
   private collected = 0
 
   private coeffDelay = 1
 
+  private msgText!: Phaser.GameObjects.Text
   private debText!: Phaser.GameObjects.Text
 
   constructor() {
@@ -98,9 +99,12 @@ export class MainScene extends Phaser.Scene {
       ])
     }, this)
 
+    this.msgText = this.add.text(this.scale.width / 2, this.scale.height / 2, '', { fontSize: '40px', color: '#ffffff' })
+    this.msgText.setOrigin(.5)
+    this.msgText.visible = false;
     this.debText = this.add.text(0, 0, 'deb', { fontSize: '20px', color: '#ffffff' })
 
-    this.resetGame()
+    this.levelUp()
   }
 
   update() {
@@ -140,10 +144,9 @@ export class MainScene extends Phaser.Scene {
     })) {
       this.coeffDelay = Math.max(this.coeffDelay - DELAY_STEP, .1)
       this.currentScore += 10
-      this.collected ++
+      this.collected++
       if (this.collected >= 10) {
-        this.resetGame()
-        this.level++
+        this.levelUp()
       }
       this.updateInfo()
     }
@@ -164,9 +167,7 @@ export class MainScene extends Phaser.Scene {
       this.freeze = true
       this.rest--
       if (this.rest <= 0) {
-        this.rest = 3
-        this.currentScore = 0
-        this.level = 1
+        this.gameOver()
       }
       this.actor.damage(this.resetGame)
     }
@@ -225,9 +226,40 @@ export class MainScene extends Phaser.Scene {
     const { width, height } = this.scale
     this.actor.setPosition(width / 2, height / 2)
     this.actor.setAlpha(1)
+    this.msgText.visible = false
 
     this.updateInfo()
     this.freeze = false
+  }
+
+  showMessage(msg: string, onComplete: () => void, completeDelay = 1000) {
+    this.freeze = true
+    const { width, height } = this.scale
+    this.msgText.setPosition(width / 2, height / 2)
+    this.msgText.visible = true
+    this.msgText.setText(msg)
+    this.tweens.add({
+      targets: this.msgText,
+      duration: 70,
+      alpha: 0,
+      yoyo: true,
+      completeDelay,
+      repeat: 3,
+      onComplete,
+      callbackScope: this,
+    })
+  }
+
+  levelUp() {
+    this.level++
+    this.showMessage(`LEVEL: ${this.level}`, this.resetGame)
+  }
+
+  gameOver() {
+    this.rest = 3
+    this.currentScore = 0
+    this.level = 0
+    this.showMessage('GAME OVER', this.resetGame, 3 * 1000)
   }
 
   getRandom(): Phaser.Types.Math.Vector2Like {
