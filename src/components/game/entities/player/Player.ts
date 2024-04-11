@@ -1,5 +1,6 @@
-import { Entity } from "."
-import { BASE_DRAG, BASE_VELOCITY, MIN_VELOCITY } from "../constants"
+import { Entity } from ".."
+import { BASE_DRAG, BASE_VELOCITY, MIN_VELOCITY } from "../../constants"
+import { PlayerStates } from "./Player.types"
 
 class Player extends Entity {
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -9,49 +10,43 @@ class Player extends Entity {
     this.cBody.setDrag(BASE_DRAG)
     this.cBody.setCollideWorldBounds(true)
 
-    this.state = 0
-    this.play('stay')
+    this.setState(PlayerStates.Stay)
   }
 
   setVelocity({ x, y }: Phaser.Types.Math.Vector2Like) {
     this.cBody.setVelocity(x * this.currentVelocity, y * this.currentVelocity)
 
     if (x > 0) {
-      if (this.state != 1) {
-        this.state = 1
-        this.play('walkRight')
+      if (this.state != PlayerStates.WalkRight) {
+        this.setState(PlayerStates.WalkRight)
       }
     }
     if (x < 0) {
-      if (this.state != 2) {
-        this.state = 2
-        this.play('walkLeft')
+      if (this.state != PlayerStates.WalkLeft) {
+        this.setState(PlayerStates.WalkLeft)
       }
     }
     if (y > 0) {
-      if (this.state != 3) {
-        this.state = 3
-        this.play('walkDown')
+      if (this.state != PlayerStates.WalkDown) {
+        this.setState(PlayerStates.WalkDown)
       }
     }
     if (y < 0) {
-      if (this.state != 4) {
-        this.state = 4
-        this.play('walkUp')
+      if (this.state != PlayerStates.WalkDown) {
+        this.setState(PlayerStates.WalkDown)
       }
     }
   }
 
   checkVelocity() {
     if (this.cBody.velocity.length() < MIN_VELOCITY) {
-      this.state = 0;
-      this.play('stay')
+      this.setState(PlayerStates.Stay)
     }
   }
 
   damage(onComplete = () => { /*  */ }) {
     this.cBody.setVelocity(0)
-    this.play('stay')
+    this.setState(PlayerStates.Stay)
     this.scene.tweens.add({
       targets: this,
       duration: 100,
@@ -77,6 +72,13 @@ class Player extends Entity {
 
   get currentVelocity() {
     return BASE_VELOCITY
+  }
+
+  override setState(value: string | number): this {
+    super.setState(value)
+    this.play(PlayerStates[Number(value)])
+
+    return this
   }
 }
 

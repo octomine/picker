@@ -1,6 +1,6 @@
 import { DELAY, DELAY_STEP, MIN_DIST, MODIFIER_DELAY, MODIFIER_WAIT } from "../../constants";
-import { Modifier, Player } from "../../entities";
-import Score from "../../entities/Score";
+import { Modifier, Player, Score } from "../../entities";
+import { ModifierStates } from "../../entities/modifier";
 import { createAnimations } from "./";
 
 export class MainScene extends Phaser.Scene {
@@ -157,7 +157,11 @@ export class MainScene extends Phaser.Scene {
       const cModifier = modifier as Modifier;
       this.modifierGrp.remove(cModifier)
       cModifier.collect()
-      this.coeffDelay = Math.max(this.coeffDelay + DELAY_STEP, 1)
+      switch (cModifier.state) {
+        case ModifierStates.TimeIncrease:
+        default:
+          this.coeffDelay = Math.max(this.coeffDelay + DELAY_STEP, 1)
+      }
     })) {
       this.resetModifierTimer()
     }
