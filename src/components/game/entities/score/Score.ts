@@ -1,4 +1,4 @@
-import { Entity } from ".";
+import { Entity } from "..";
 
 class Score extends Entity {
   constructor(scene: Phaser.Scene, x: number, y: number) {

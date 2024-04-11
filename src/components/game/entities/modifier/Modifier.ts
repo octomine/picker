@@ -1,10 +1,11 @@
-import { Entity } from "."
+import { ModifierStates } from "."
+import { Entity } from ".."
 
 class Modifier extends Entity {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0, 'modifier')
 
-    this.setState(Phaser.Math.Between(0, 1))
+    this.setState(Phaser.Math.Between(0, ModifierStates.__Length))
   }
 
   collect() {

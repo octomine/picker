@@ -1,3 +1,4 @@
-export { default as Entity } from './Entity'
-export { default as Player } from './Player'
-export { default as Modifier } from './Modifier'
+export { Entity } from './entity'
+export { Player } from './player'
+export { Modifier } from './modifier'
+export { Score } from './score'
