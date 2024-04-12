@@ -1,6 +1,6 @@
+import { PlayerStates } from "."
 import { Entity } from ".."
 import { BASE_DRAG, BASE_VELOCITY, MIN_VELOCITY } from "../../constants"
-import { PlayerStates } from "./Player.types"
 
 class Player extends Entity {
   constructor(scene: Phaser.Scene, x: number, y: number) {
