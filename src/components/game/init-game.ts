@@ -11,7 +11,6 @@ export const initGame = () => {
   const config = {
     type: Phaser.CANVAS,
     parent: 'game',
-    canvas: document.getElementById('game-canvas') as HTMLCanvasElement,
     width: window.innerWidth,
     height: window.innerHeight,
     scale: {
