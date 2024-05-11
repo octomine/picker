@@ -1,4 +1,4 @@
-class Entity extends Phaser.GameObjects.Sprite {
+class Entity extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number, texture = '', frame = 0) {
     super(scene, x, y, texture, frame)
 

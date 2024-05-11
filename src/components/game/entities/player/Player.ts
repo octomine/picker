@@ -1,6 +1,7 @@
 import { PlayerStates } from "."
 import { Entity } from ".."
 import { BASE_DRAG, BASE_VELOCITY, MIN_VELOCITY } from "../../constants"
+import { Directions, TMoveParams } from "../../swipe"
 
 class Player extends Entity {
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -13,28 +14,24 @@ class Player extends Entity {
     this.setState(PlayerStates.Stay)
   }
 
-  setVelocity({ x, y }: Phaser.Types.Math.Vector2Like) {
-    this.cBody.setVelocity(x * this.currentVelocity, y * this.currentVelocity)
-
-    if (x > 0) {
-      if (this.state != PlayerStates.WalkRight) {
-        this.setState(PlayerStates.WalkRight)
-      }
-    }
-    if (x < 0) {
-      if (this.state != PlayerStates.WalkLeft) {
-        this.setState(PlayerStates.WalkLeft)
-      }
-    }
-    if (y > 0) {
-      if (this.state != PlayerStates.WalkDown) {
-        this.setState(PlayerStates.WalkDown)
-      }
-    }
-    if (y < 0) {
-      if (this.state != PlayerStates.WalkDown) {
-        this.setState(PlayerStates.WalkDown)
-      }
+  walk({ direction }: TMoveParams) {
+    switch (direction) {
+      case Directions.None:
+        this.setVelocity(0)
+        break
+      case Directions.Up:
+        this.setVelocityY(-this.currentVelocity)
+        break
+      case Directions.Down:
+        this.setVelocityY(this.currentVelocity)
+        break
+      case Directions.Left:
+        this.setVelocityX(-this.currentVelocity)
+        break
+      case Directions.Right:
+        this.setVelocityX(this.currentVelocity)
+        break
+      default:
     }
   }
 

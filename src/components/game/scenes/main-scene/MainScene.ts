@@ -1,16 +1,15 @@
-import { DELAY, DELAY_STEP, MIN_DIST, MODIFIER_DELAY, MODIFIER_WAIT } from "../../constants";
+import { DELAY, DELAY_STEP, MODIFIER_DELAY, MODIFIER_WAIT } from "../../constants";
 import { Modifier, Player, Score } from "../../entities";
 import { ModifierStates } from "../../entities/modifier";
+import { Directions, Swipe } from "../../swipe";
 import { createAnimations } from "./";
 
 export class MainScene extends Phaser.Scene {
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
+  private swipe!: Swipe
   private freeze = false
 
   private actor!: Player
-  private direction: Phaser.Types.Math.Vector2Like = { x: 0, y: 0 }
-  private pressedPoint!: Phaser.Types.Math.Vector2Like
-  private isDragging = false;
 
   private scoreGrp!: Phaser.GameObjects.Group
   private penaltyGrp!: Phaser.GameObjects.Group
@@ -54,42 +53,11 @@ export class MainScene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard?.createCursorKeys()
 
-    this.input.addPointer(9)
-    this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-      this.isDragging = true
-      const { x, y } = pointer
-      this.pressedPoint = { x, y }
-    }, this)
-
-    this.input.on(Phaser.Input.Events.POINTER_UP, () => {
-      this.isDragging = false
-      this.direction = { x: 0, y: 0 }
-    }, this)
-
-    this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
-      if (this.isDragging) {
-        const { position, prevPosition, x, y } = pointer
-        const dist = position.distance(prevPosition)
-        if (dist > MIN_DIST) {
-          const dx = x - this.pressedPoint.x
-          const dy = y - this.pressedPoint.y
-          const xx = Math.abs(dx)
-          const yy = Math.abs(dy)
-          if (yy > xx) {
-            this.direction = { x: 0, y: Math.sign(dy) }
-          } else {
-            this.direction = { x: Math.sign(dx), y: 0 }
-          }
-          this.actor.setVelocity(this.direction)
-        } else {
-          this.pressedPoint = { x, y }
-        }
-      }
-    }, this)
-
-    this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_UP, () => {
-      this.direction = { x: 0, y: 0 }
-    }, this)
+    this.swipe = new Swipe(this)
+    this.swipe.addListeners({
+      onMove: this.actor.walk.bind(this.actor),
+      onUp: () => { }
+    })
 
     this.scale.addListener(Phaser.Scale.Events.RESIZE, ({ width, height }: { width: number, height: number }) => {
       console.log('RESIZE!!1');
@@ -112,26 +80,17 @@ export class MainScene extends Phaser.Scene {
       return
     }
 
-    const { x, y } = this.direction
-    if (x !== 0 || y !== 0) {
-      this.actor.setVelocity(this.direction)
-    }
-
-    if (x === 0 && y === 0) {
-      this.actor.checkVelocity()
-    }
-
     if (this.cursors?.down.isDown) {
-      this.actor.setVelocity({ x: 0, y: 1 })
+      this.actor.walk({ direction: Directions.Down })
     }
     if (this.cursors?.up.isDown) {
-      this.actor.setVelocity({ x: 0, y: -1 })
+      this.actor.walk({ direction: Directions.Up })
     }
     if (this.cursors?.right.isDown) {
-      this.actor.setVelocity({ x: 1, y: 0 })
+      this.actor.walk({ direction: Directions.Right })
     }
     if (this.cursors?.left.isDown) {
-      this.actor.setVelocity({ x: -1, y: 0 })
+      this.actor.walk({ direction: Directions.Left })
     }
 
     // *** COLLISIONS ***
